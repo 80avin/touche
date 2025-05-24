@@ -3,6 +3,8 @@ runtime: org.gnome.Platform
 runtime-version: '48'
 sdk: org.gnome.Sdk
 command: com.github.joseexposito.touche
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.node20
 finish-args:
   - '--share=ipc'
   - '--socket=fallback-x11'
@@ -10,20 +12,40 @@ finish-args:
   - '--filesystem=~/.config'
   - '--filesystem=host:ro'
   - '--device=dri'
+build-options:
+  append-path: /usr/lib/sdk/node20/bin
+  env:
+    NPM_CONFIG_LOGLEVEL: info
 modules:
-  - name: nodejs
-    cleanup:
-      - '*'
+  - name: npm-install
+    buildsystem: simple
+    build-options:
+      env:
+        XDG_CACHE_HOME: /run/build/npm-install/flatpak-node/cache
+        npm_config_cache: /run/build/npm-install/flatpak-node/npm-cache
+        npm_config_offline: 'true'
     sources:
-      - type: archive
-        url: https://nodejs.org/dist/v20.12.1/node-v20.12.1.tar.gz
-        sha256: b9bef0314e12773ef004368ee56a2db509a948d4170b9efb07441bac1f1407a0
-
+      - type: dir
+        path: .
+        skip:
+          - .git
+          - .flatpak-builder
+          - build
+          - debian
+          - rpm
+          - com.github.joseexposito.touche.yml
+    build-commands:
+      - npm install --offline
   - name: touche
     buildsystem: meson
     config-opts:
       - -Dflatpak=true
       - -Dsystem-config-file-path=/var/run/host/usr/share/touchegg/touchegg.conf
+    build-options:
+      env:
+        XDG_CACHE_HOME: /run/build/com.github.joseexposito.touche/flatpak-node/cache
+        npm_config_cache: /run/build/com.github.joseexposito.touche/flatpak-node/npm-cache
+        npm_config_offline: 'true'
     sources:
       - type: dir
         path: .

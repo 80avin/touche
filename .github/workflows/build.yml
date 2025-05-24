@@ -12,6 +12,15 @@ jobs:
       options: --privileged
     steps:
       - uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: install frontend dependencies
+        run: npm install # change this to npm, pnpm or bun depending on which one you use.
+
       - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           bundle: palette.flatpak
